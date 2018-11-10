@@ -6,9 +6,13 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
+    @Query(value = "SELECT u FROM Usuario u WHERE u.code = ?1 AND u.excluido = false")
+    Optional<Usuario> findById(Long code);
+
     @Override
     @Query(name = "Usuario.findAll")
     List<Usuario> findAll();

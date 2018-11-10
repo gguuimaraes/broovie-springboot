@@ -38,15 +38,10 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-quartz</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <!--<scope>runtime</scope>-->
         </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -57,32 +52,22 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.apache.mahout/mahout-core -->
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-core</artifactId>
             <version>0.9</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.apache.mahout/mahout-integration -->
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-integration</artifactId>
             <version>0.9</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.apache.mahout/mahout-math -->
         <dependency>
             <groupId>org.apache.mahout</groupId>
             <artifactId>mahout-math</artifactId>
             <version>0.9</version>
         </dependency>
-
-
-
     </dependencies>
-
     <build>
         <plugins>
             <plugin>

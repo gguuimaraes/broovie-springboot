@@ -27,33 +27,33 @@ public class UsuarioController implements GenericOperations<Usuario> {
     @Override
     @PostMapping(path = "/usuario", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public HttpEntity<Usuario> create(@RequestBody Usuario o) {
-        usuarioRepository.save(o);
-        o.add(linkTo(methodOn(UsuarioController.class).read(o.getCode())).withSelfRel());
-        o.add(linkTo(methodOn(UsuarioController.class).amigos(o.getCode())).withRel("amigos"));
-        return new ResponseEntity<>(o, o.getCode() != null ? HttpStatus.CREATED : HttpStatus.NO_CONTENT);
+    public HttpEntity<Usuario> create(@RequestBody Usuario u) {
+        usuarioRepository.save(u);
+        u.add(linkTo(methodOn(UsuarioController.class).read(u.getCode())).withSelfRel());
+        u.add(linkTo(methodOn(UsuarioController.class).amigos(u.getCode())).withRel("amigos"));
+        return new ResponseEntity<>(u, u.getCode() != null ? HttpStatus.CREATED : HttpStatus.NO_CONTENT);
     }
 
     @Override
     @PutMapping(path = "/usuario", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public HttpEntity<Usuario> update(@RequestBody Usuario o) {
-        Optional<Usuario> result = usuarioRepository.findById(o.getCode());
+    public HttpEntity<Usuario> update(@RequestBody Usuario u) {
+        Optional<Usuario> result = usuarioRepository.findById(u.getCode());
         result.ifPresent(usuario -> {
-            usuario.setAmigos(o.getAmigos());
-            usuario.setDataNascimento(o.getDataNascimento());
-            usuario.setEmail(o.getEmail());
-            usuario.setGeneros(o.getGeneros());
-            usuario.setNome(o.getNome());
-            usuario.setNomeUsuario(o.getNomeUsuario());
-            usuario.setPais(o.getPais());
-            usuario.setSenha(o.getSenha());
+            usuario.setAmigos(u.getAmigos());
+            usuario.setDataNascimento(u.getDataNascimento());
+            usuario.setEmail(u.getEmail());
+            usuario.setGeneros(u.getGeneros());
+            usuario.setNome(u.getNome());
+            usuario.setNomeUsuario(u.getNomeUsuario());
+            usuario.setPais(u.getPais());
+            usuario.setSenha(u.getSenha());
             usuarioRepository.save(usuario);
         });
-        result.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, o.getCode()));
-        o.add(linkTo(methodOn(UsuarioController.class).read(o.getCode())).withSelfRel());
-        o.add(linkTo(methodOn(UsuarioController.class).amigos(o.getCode())).withRel("amigos"));
-        return new ResponseEntity<>(o, HttpStatus.CREATED);
+        result.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, u.getCode()));
+        u.add(linkTo(methodOn(UsuarioController.class).read(u.getCode())).withSelfRel());
+        u.add(linkTo(methodOn(UsuarioController.class).amigos(u.getCode())).withRel("amigos"));
+        return new ResponseEntity<>(u, HttpStatus.CREATED);
     }
 
     @Override
@@ -74,9 +74,9 @@ public class UsuarioController implements GenericOperations<Usuario> {
     @DeleteMapping(path = "/usuario/{code}")
     public HttpEntity<Usuario> delete(@PathVariable(value = "code") long code) {
         Optional<Usuario> result = usuarioRepository.findById(code);
-        result.ifPresent(genero -> {
-            genero.setExcluido(true);
-            usuarioRepository.save(genero);
+        result.ifPresent(usuario -> {
+            usuario.setExcluido(true);
+            usuarioRepository.save(usuario);
         });
         result.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, code));
         result.get().add(linkTo(methodOn(UsuarioController.class).read(code)).withSelfRel());
@@ -123,11 +123,67 @@ public class UsuarioController implements GenericOperations<Usuario> {
     @GetMapping(path = "/usuario/{code}/amigos", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public HttpEntity<List<Usuario>> amigos(@PathVariable(value = "code") long code) {
         List<Usuario> usuarios = usuarioRepository.amigos(code);
-        usuarios.forEach(o -> {
-            o.add(linkTo(methodOn(UsuarioController.class).read(o.getCode())).withSelfRel());
-            o.add(linkTo(methodOn(UsuarioController.class).amigos(o.getCode())).withRel("amigos"));
+        usuarios.forEach(u -> {
+            u.add(linkTo(methodOn(UsuarioController.class).read(u.getCode())).withSelfRel());
+            u.add(linkTo(methodOn(UsuarioController.class).amigos(u.getCode())).withRel("amigos"));
         });
         return new ResponseEntity<>(usuarios, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/usuario/{code}/amigos", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public HttpEntity<List<Usuario>> adicionarAmigo(@PathVariable(value = "code") long code, @RequestBody Usuario amigo) {
+        if (!amigo.getCode().equals(code)) {
+            Optional<Usuario> result = usuarioRepository.findById(code);
+            result.ifPresent(usuario -> {
+                usuario.setAmigos(usuarioRepository.amigos(code));
+                boolean isAmigo = false;
+                for (Usuario usuarioAmigo : usuario.getAmigos()) {
+                    if (usuarioAmigo.getCode().equals(amigo.getCode())) {
+                        isAmigo = true;
+                        break;
+                    }
+                }
+                if (!isAmigo) {
+                    Optional<Usuario> result2 = usuarioRepository.findById(amigo.getCode());
+                    result2.ifPresent(amigo2 -> {
+                        usuario.getAmigos().add(amigo2);
+                    });
+                    result2.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, amigo.getCode()));
+                    usuarioRepository.save(usuario);
+                }
+            });
+            result.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, code));
+        }
+        return amigos(code);
+    }
+
+    @DeleteMapping(path = "/usuario/{code}/amigos", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public HttpEntity<List<Usuario>> removerAmigo(@PathVariable(value = "code") long code, @RequestBody Usuario amigo) {
+        if (!amigo.getCode().equals(code)) {
+            Optional<Usuario> result = usuarioRepository.findById(code);
+            result.ifPresent(usuario -> {
+                usuario.setAmigos(usuarioRepository.amigos(code));
+                boolean isAmigo = false;
+                for (Usuario usuarioAmigo : usuario.getAmigos()) {
+                    if (usuarioAmigo.getCode().equals(amigo.getCode())) {
+                        isAmigo = true;
+                        break;
+                    }
+                }
+                if (isAmigo) {
+                    Optional<Usuario> result2 = usuarioRepository.findById(amigo.getCode());
+                    result2.ifPresent(amigo2 -> {
+                        usuario.getAmigos().remove(amigo2);
+                    });
+                    result2.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, amigo.getCode()));
+                    usuarioRepository.save(usuario);
+                }
+            });
+            result.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, code));
+        }
+        return amigos(code);
     }
 }
 
