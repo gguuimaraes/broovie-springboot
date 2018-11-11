@@ -28,10 +28,13 @@ import java.util.List;
 public class Usuario extends DefaultModel {
     @Column(length = 70, nullable = false)
     private String nome;
+
     @Column(length = 30, unique = true, nullable = false)
     private String nomeUsuario;
+
     @Column(length = 40)
     private String email;
+
     @Column
     @Temporal(TemporalType.DATE)
     private Date dataNascimento;
@@ -41,7 +44,7 @@ public class Usuario extends DefaultModel {
     private String senha;
 
     @JsonIgnore
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY) 
     private List<Usuario> amigos = new ArrayList<>();
 
     @ManyToMany

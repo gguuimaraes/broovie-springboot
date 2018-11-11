@@ -94,7 +94,7 @@ public class UsuarioController implements GenericOperations<Usuario> {
         return new ResponseEntity<>(usuarios, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/usuario/pesquisar", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "/usuarios/pesquisar", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public HttpEntity<List<Usuario>> pesquisar(
             @RequestParam(value = "nome", defaultValue = "", required = false) String nome,
             @RequestParam(value = "nomeUsuario", defaultValue = "", required = false) String nomeUsuario) {
