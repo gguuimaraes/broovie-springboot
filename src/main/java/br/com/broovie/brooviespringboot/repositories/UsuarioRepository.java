@@ -21,8 +21,6 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
 
     Usuario autenticar(String nomeUsuario, String senha);
 
-    List<Usuario> amigos(Long code);
-
     @Query(value = "SELECT COUNT(u) FROM Usuario u")
     int quantidade();
 }

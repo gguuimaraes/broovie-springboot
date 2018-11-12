@@ -30,7 +30,7 @@ public class UsuarioController implements GenericOperations<Usuario> {
     public HttpEntity<Usuario> create(@RequestBody Usuario u) {
         usuarioRepository.save(u);
         u.add(linkTo(methodOn(UsuarioController.class).read(u.getCode())).withSelfRel());
-        u.add(linkTo(methodOn(UsuarioController.class).amigos(u.getCode())).withRel("amigos"));
+        u.add(linkTo(methodOn(AmizadeController.class).amigos(u.getCode())).withRel("amigos"));
         return new ResponseEntity<>(u, u.getCode() != null ? HttpStatus.CREATED : HttpStatus.NO_CONTENT);
     }
 
@@ -40,7 +40,6 @@ public class UsuarioController implements GenericOperations<Usuario> {
     public HttpEntity<Usuario> update(@RequestBody Usuario u) {
         Optional<Usuario> result = usuarioRepository.findById(u.getCode());
         result.ifPresent(usuario -> {
-            usuario.setAmigos(u.getAmigos());
             usuario.setDataNascimento(u.getDataNascimento());
             usuario.setEmail(u.getEmail());
             usuario.setGeneros(u.getGeneros());
@@ -52,7 +51,7 @@ public class UsuarioController implements GenericOperations<Usuario> {
         });
         result.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, u.getCode()));
         u.add(linkTo(methodOn(UsuarioController.class).read(u.getCode())).withSelfRel());
-        u.add(linkTo(methodOn(UsuarioController.class).amigos(u.getCode())).withRel("amigos"));
+        u.add(linkTo(methodOn(AmizadeController.class).amigos(u.getCode())).withRel("amigos"));
         return new ResponseEntity<>(u, HttpStatus.CREATED);
     }
 
@@ -63,7 +62,7 @@ public class UsuarioController implements GenericOperations<Usuario> {
         if (result.isPresent()) {
             Usuario entity = result.get();
             entity.add(linkTo(methodOn(UsuarioController.class).read(entity.getCode())).withSelfRel());
-            entity.add(linkTo(methodOn(UsuarioController.class).amigos(entity.getCode())).withRel("amigos"));
+            entity.add(linkTo(methodOn(AmizadeController.class).amigos(entity.getCode())).withRel("amigos"));
             entity.add(linkTo(methodOn(UsuarioController.class).read()).withRel("all"));
             return new ResponseEntity<>(entity, HttpStatus.OK);
         }
@@ -89,7 +88,7 @@ public class UsuarioController implements GenericOperations<Usuario> {
         List<Usuario> usuarios = usuarioRepository.findAll();
         usuarios.forEach(o -> {
             o.add(linkTo(methodOn(UsuarioController.class).read(o.getCode())).withSelfRel());
-            o.add(linkTo(methodOn(UsuarioController.class).amigos(o.getCode())).withRel("amigos"));
+            o.add(linkTo(methodOn(AmizadeController.class).amigos(o.getCode())).withRel("amigos"));
         });
         return new ResponseEntity<>(usuarios, HttpStatus.OK);
     }
@@ -103,7 +102,7 @@ public class UsuarioController implements GenericOperations<Usuario> {
         List<Usuario> usuarios = usuarioRepository.pesquisar(nome, nomeUsuario);
         usuarios.forEach(o -> {
             o.add(linkTo(methodOn(UsuarioController.class).read(o.getCode())).withSelfRel());
-            o.add(linkTo(methodOn(UsuarioController.class).amigos(o.getCode())).withRel("amigos"));
+            o.add(linkTo(methodOn(AmizadeController.class).amigos(o.getCode())).withRel("amigos"));
         });
         return new ResponseEntity<>(usuarios, HttpStatus.OK);
     }
@@ -113,77 +112,11 @@ public class UsuarioController implements GenericOperations<Usuario> {
         Usuario usuario = usuarioRepository.autenticar(nomeUsuario, senha);
         if (usuario != null) {
             usuario.add(linkTo(methodOn(UsuarioController.class).read(usuario.getCode())).withSelfRel());
-            usuario.add(linkTo(methodOn(UsuarioController.class).amigos(usuario.getCode())).withRel("amigos"));
+            usuario.add(linkTo(methodOn(AmizadeController.class).amigos(usuario.getCode())).withRel("amigos"));
             usuario.add(linkTo(methodOn(UsuarioController.class).read()).withRel("all"));
             return new ResponseEntity<>(usuario, HttpStatus.OK);
         }
         throw new ResourceNotFoundException("nomeUsuario or senha not found");
-    }
-
-    @GetMapping(path = "/usuario/{code}/amigos", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public HttpEntity<List<Usuario>> amigos(@PathVariable(value = "code") long code) {
-        List<Usuario> usuarios = usuarioRepository.amigos(code);
-        usuarios.forEach(u -> {
-            u.add(linkTo(methodOn(UsuarioController.class).read(u.getCode())).withSelfRel());
-            u.add(linkTo(methodOn(UsuarioController.class).amigos(u.getCode())).withRel("amigos"));
-        });
-        return new ResponseEntity<>(usuarios, HttpStatus.OK);
-    }
-
-    @PostMapping(path = "/usuario/{code}/amigos", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public HttpEntity<List<Usuario>> adicionarAmigo(@PathVariable(value = "code") long code, @RequestBody Usuario amigo) {
-        if (!amigo.getCode().equals(code)) {
-            Optional<Usuario> result = usuarioRepository.findById(code);
-            result.ifPresent(usuario -> {
-                usuario.setAmigos(usuarioRepository.amigos(code));
-                boolean isAmigo = false;
-                for (Usuario usuarioAmigo : usuario.getAmigos()) {
-                    if (usuarioAmigo.getCode().equals(amigo.getCode())) {
-                        isAmigo = true;
-                        break;
-                    }
-                }
-                if (!isAmigo) {
-                    Optional<Usuario> result2 = usuarioRepository.findById(amigo.getCode());
-                    result2.ifPresent(amigo2 -> {
-                        usuario.getAmigos().add(amigo2);
-                    });
-                    result2.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, amigo.getCode()));
-                    usuarioRepository.save(usuario);
-                }
-            });
-            result.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, code));
-        }
-        return amigos(code);
-    }
-
-    @DeleteMapping(path = "/usuario/{code}/amigos", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public HttpEntity<List<Usuario>> removerAmigo(@PathVariable(value = "code") long code, @RequestBody Usuario amigo) {
-        if (!amigo.getCode().equals(code)) {
-            Optional<Usuario> result = usuarioRepository.findById(code);
-            result.ifPresent(usuario -> {
-                usuario.setAmigos(usuarioRepository.amigos(code));
-                boolean isAmigo = false;
-                for (Usuario usuarioAmigo : usuario.getAmigos()) {
-                    if (usuarioAmigo.getCode().equals(amigo.getCode())) {
-                        isAmigo = true;
-                        break;
-                    }
-                }
-                if (isAmigo) {
-                    Optional<Usuario> result2 = usuarioRepository.findById(amigo.getCode());
-                    result2.ifPresent(amigo2 -> {
-                        usuario.getAmigos().remove(amigo2);
-                    });
-                    result2.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, amigo.getCode()));
-                    usuarioRepository.save(usuario);
-                }
-            });
-            result.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, code));
-        }
-        return amigos(code);
     }
 }
 

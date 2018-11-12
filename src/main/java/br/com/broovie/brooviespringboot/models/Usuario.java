@@ -16,13 +16,13 @@ import java.util.List;
 @ToString
 
 
-@Entity
+
 @NamedQueries({
         @NamedQuery(name = "Usuario.findAll", query = "SELECT u FROM Usuario u WHERE u.excluido = false"),
         @NamedQuery(name = "Usuario.pesquisar", query = "SELECT u FROM Usuario u WHERE UPPER(u.nome) LIKE CONCAT('%',UPPER(?1),'%') AND UPPER(u.nomeUsuario) LIKE CONCAT('%',UPPER(?2),'%') AND u.excluido = false"),
         @NamedQuery(name = "Usuario.autenticar", query = "SELECT u FROM Usuario u WHERE u.nomeUsuario = ?1 AND u.senha = ?2 AND u.excluido = false"),
-        @NamedQuery(name = "Usuario.amigos", query = "SELECT u.amigos FROM Usuario u WHERE u.code = ?1 AND u.excluido = false")
 })
+@Entity
 @Table
 
 public class Usuario extends DefaultModel {
@@ -38,14 +38,12 @@ public class Usuario extends DefaultModel {
     @Column
     @Temporal(TemporalType.DATE)
     private Date dataNascimento;
+
     @Column
     private String pais;
+
     @Column(nullable = false)
     private String senha;
-
-    @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY) 
-    private List<Usuario> amigos = new ArrayList<>();
 
     @ManyToMany
     private List<Genero> generos = new ArrayList<>();
