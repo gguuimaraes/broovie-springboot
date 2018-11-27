@@ -11,10 +11,6 @@ import java.util.Date;
 
 @MappedSuperclass
 public abstract class DefaultModel extends ResourceSupport {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    protected Long code;
-
     @JsonIgnore
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean excluido = false;

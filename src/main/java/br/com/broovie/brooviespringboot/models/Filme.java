@@ -1,13 +1,11 @@
 package br.com.broovie.brooviespringboot.models;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import javax.persistence.*;
-import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Builder
@@ -15,15 +13,15 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 
-@NamedQueries({
-        @NamedQuery(name = "Filme.findAll", query = "SELECT f FROM Filme f WHERE f.excluido = false"),
-        @NamedQuery(name = "Filme.pesquisar", query = "SELECT f FROM Filme f WHERE UPPER(f.nome) LIKE CONCAT('%',UPPER(?1),'%') AND f.excluido = false"),
-        @NamedQuery(name = "Filme.fotoCapa", query = "SELECT a FROM Arquivo a, Filme f WHERE f.code = ?1 AND a = f.fotoCapa AND f.excluido = false AND a.excluido = false")
-})
 @Entity
 @Table
 public class Filme extends DefaultModel {
-    @Column(unique = true)
+    @Id
+    //@GeneratedValue(strategy = GenerationType.AUTO, generator = "filme_seq")
+    //@SequenceGenerator(name = "filme_seq", initialValue = 99, allocationSize = 1)
+    private Long code;
+
+    @Column
     private String nome;
 
     @ManyToMany
@@ -34,9 +32,21 @@ public class Filme extends DefaultModel {
 
     private boolean adulto;
 
-    @JsonIgnore
-    @OneToOne(fetch = FetchType.LAZY)
-    private Arquivo fotoCapa;
+    private String fotoCapa;
 
     private int classificacaoIndicativa;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Filme filme = (Filme) o;
+        return Objects.equals(code, filme.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), code);
+    }
 }

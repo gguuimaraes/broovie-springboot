@@ -49,7 +49,7 @@ public class UsuarioController implements GenericOperations<Usuario> {
             usuario.setSenha(u.getSenha());
             usuarioRepository.save(usuario);
         });
-        result.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, u.getCode()));
+        result.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, "code", u.getCode()));
         u.add(linkTo(methodOn(UsuarioController.class).read(u.getCode())).withSelfRel());
         u.add(linkTo(methodOn(AmizadeController.class).amigos(u.getCode())).withRel("amigos"));
         return new ResponseEntity<>(u, HttpStatus.CREATED);
@@ -66,7 +66,7 @@ public class UsuarioController implements GenericOperations<Usuario> {
             entity.add(linkTo(methodOn(UsuarioController.class).read()).withRel("all"));
             return new ResponseEntity<>(entity, HttpStatus.OK);
         }
-        throw new ResourceNotFoundException(Usuario.class, code);
+        throw new ResourceNotFoundException(Usuario.class, "code", code);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class UsuarioController implements GenericOperations<Usuario> {
             usuario.setExcluido(true);
             usuarioRepository.save(usuario);
         });
-        result.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, code));
+        result.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, "code", code));
         result.get().add(linkTo(methodOn(UsuarioController.class).read(code)).withSelfRel());
         return new ResponseEntity<>(result.get(), HttpStatus.CREATED);
     }
@@ -107,16 +107,17 @@ public class UsuarioController implements GenericOperations<Usuario> {
         return new ResponseEntity<>(usuarios, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/usuario/autenticar", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public HttpEntity<Usuario> autenticar(@RequestParam(value = "nomeUsuario") String nomeUsuario, @RequestParam(value = "senha") String senha) {
-        Usuario usuario = usuarioRepository.autenticar(nomeUsuario, senha);
-        if (usuario != null) {
+    @GetMapping(path = "/usuario", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public HttpEntity<Usuario> readByNomeUsuario(@RequestParam(value = "nomeUsuario") String nomeUsuario) {
+        Optional<Usuario> result = usuarioRepository.findByNomeUsuario(nomeUsuario);
+        if (result.isPresent()) {
+            Usuario usuario = result.get();
             usuario.add(linkTo(methodOn(UsuarioController.class).read(usuario.getCode())).withSelfRel());
             usuario.add(linkTo(methodOn(AmizadeController.class).amigos(usuario.getCode())).withRel("amigos"));
             usuario.add(linkTo(methodOn(UsuarioController.class).read()).withRel("all"));
             return new ResponseEntity<>(usuario, HttpStatus.OK);
         }
-        throw new ResourceNotFoundException("nomeUsuario or senha not found");
+        throw new ResourceNotFoundException(Usuario.class, "nomeUsuario", nomeUsuario);
     }
 }
 

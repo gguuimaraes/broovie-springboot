@@ -1,13 +1,11 @@
 package br.com.broovie.brooviespringboot.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
@@ -15,17 +13,14 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 
-
-
-@NamedQueries({
-        @NamedQuery(name = "Usuario.findAll", query = "SELECT u FROM Usuario u WHERE u.excluido = false"),
-        @NamedQuery(name = "Usuario.pesquisar", query = "SELECT u FROM Usuario u WHERE UPPER(u.nome) LIKE CONCAT('%',UPPER(?1),'%') AND UPPER(u.nomeUsuario) LIKE CONCAT('%',UPPER(?2),'%') AND u.excluido = false"),
-        @NamedQuery(name = "Usuario.autenticar", query = "SELECT u FROM Usuario u WHERE u.nomeUsuario = ?1 AND u.senha = ?2 AND u.excluido = false"),
-})
 @Entity
 @Table
-
 public class Usuario extends DefaultModel {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usuario_seq")
+    @SequenceGenerator(name = "usuario_seq", initialValue = 372, allocationSize = 1)
+    private Long code;
+
     @Column(length = 70, nullable = false)
     private String nome;
 
@@ -45,6 +40,7 @@ public class Usuario extends DefaultModel {
     @Column(nullable = false)
     private String senha;
 
-    @ManyToMany
-    private List<Genero> generos = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Genero> generos = new HashSet<>();
+
 }

@@ -14,8 +14,9 @@ public interface GeneroRepository extends CrudRepository<Genero, Long> {
     Optional<Genero> findById(Long code);
 
     @Override
-    @Query(name = "Genero.findAll")
+    @Query(value = "SELECT g FROM Genero g WHERE g.excluido = false")
     List<Genero> findAll();
 
+    @Query(value = "SELECT g FROM Genero g WHERE UPPER(g.descricao) LIKE CONCAT('%',UPPER(?1),'%') AND g.excluido = false")
     List<Genero> pesquisar(String descricao);
 }

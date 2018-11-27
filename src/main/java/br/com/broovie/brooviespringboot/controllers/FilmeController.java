@@ -2,23 +2,10 @@ package br.com.broovie.brooviespringboot.controllers;
 
 import br.com.broovie.brooviespringboot.exceptions.ResourceNotFoundException;
 import br.com.broovie.brooviespringboot.interfaces.GenericOperations;
-import br.com.broovie.brooviespringboot.models.Arquivo;
 import br.com.broovie.brooviespringboot.models.Filme;
 import br.com.broovie.brooviespringboot.repositories.AvaliacaoRepository;
 import br.com.broovie.brooviespringboot.repositories.FilmeRepository;
 import br.com.broovie.brooviespringboot.repositories.UsuarioRepository;
-import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.eval.RecommenderBuilder;
-import org.apache.mahout.cf.taste.impl.model.jdbc.PostgreSQLJDBCDataModel;
-import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
-import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
-import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
-import org.apache.mahout.cf.taste.model.DataModel;
-import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
-import org.apache.mahout.cf.taste.recommender.RecommendedItem;
-import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.apache.mahout.cf.taste.similarity.UserSimilarity;
-import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -26,7 +13,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,7 +59,7 @@ public class FilmeController implements GenericOperations<Filme> {
             filme.setClassificacaoIndicativa(o.getClassificacaoIndicativa());
             filmeRepository.save(filme);
         });
-        result.orElseThrow(() -> new ResourceNotFoundException(Filme.class, o.getCode()));
+        result.orElseThrow(() -> new ResourceNotFoundException(Filme.class, "code",o.getCode()));
         o.add(linkTo(methodOn(FilmeController.class).read(o.getCode())).withSelfRel());
         return new ResponseEntity<>(o, HttpStatus.CREATED);
     }
@@ -83,7 +74,7 @@ public class FilmeController implements GenericOperations<Filme> {
             entity.add(linkTo(methodOn(FilmeController.class).read()).withRel("all"));
             return new ResponseEntity<>(entity, HttpStatus.OK);
         }
-        throw new ResourceNotFoundException(Filme.class, code);
+        throw new ResourceNotFoundException(Filme.class, "code",code);
     }
 
     @Override
@@ -94,7 +85,7 @@ public class FilmeController implements GenericOperations<Filme> {
             filme.setExcluido(true);
             filmeRepository.save(filme);
         });
-        result.orElseThrow(() -> new ResourceNotFoundException(Filme.class, code));
+        result.orElseThrow(() -> new ResourceNotFoundException(Filme.class, "code",code));
         result.get().add(linkTo(methodOn(FilmeController.class).read(code)).withSelfRel());
         return new ResponseEntity<>(result.get(), HttpStatus.CREATED);
     }
@@ -103,8 +94,8 @@ public class FilmeController implements GenericOperations<Filme> {
     @GetMapping(path = "/filmes", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public HttpEntity<List<Filme>> read() {
         List<Filme> filmes = filmeRepository.findAll();
-        filmes.forEach(c -> {
-            c.add(linkTo(methodOn(FilmeController.class).read(c.getCode())).withSelfRel());
+        filmes.forEach(f -> {
+            f.add(linkTo(methodOn(FilmeController.class).read(f.getCode())).withSelfRel());
         });
         return new ResponseEntity<>(filmes, HttpStatus.OK);
     }
@@ -118,49 +109,19 @@ public class FilmeController implements GenericOperations<Filme> {
         return new ResponseEntity<>(filmes, HttpStatus.OK);
     }
 
-    @GetMapping(path = "/filme/{code}/fotocapa", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public HttpEntity<Arquivo> fotoCapa(@PathVariable(value = "code") long code) {
-        Arquivo fotoCapa = filmeRepository.fotoCapa(code);
-        if (fotoCapa != null) {
-            fotoCapa.add(linkTo(methodOn(FilmeController.class).read(code)).withRel("filme"));
-            fotoCapa.add(linkTo(methodOn(FilmeController.class).fotoCapa(code)).withSelfRel());
-            return new ResponseEntity<>(fotoCapa, HttpStatus.OK);
-        }
-        throw new ResourceNotFoundException(Filme.class, code);
-    }
-
-    @GetMapping(path = "/filme/{code}/recomendados", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    public HttpEntity<List<Filme>> recomendados(@PathVariable(value = "code") long code) {
-        List<Filme> filmes = new ArrayList<>();
+    public byte[] scale(byte[] fileData) {
+        ByteArrayInputStream in = new ByteArrayInputStream(fileData);
         try {
-            PGSimpleDataSource pgSimpleDataSource = new PGSimpleDataSource();
-            pgSimpleDataSource.setDatabaseName("broovie-springboot");
-            pgSimpleDataSource.setPortNumber(5432);
-            pgSimpleDataSource.setUser("postgres");
-            pgSimpleDataSource.setPassword("142697");
-            DataModel model = new PostgreSQLJDBCDataModel(pgSimpleDataSource, "avaliacao", "usuario_code", "filme_code", "nota", null);
-            RecommenderBuilder recommenderBuilder = new RecommenderBuilder() {
-                public Recommender buildRecommender(DataModel model) throws TasteException {
-                    UserSimilarity similarity = new LogLikelihoodSimilarity(model);
-
-                    UserNeighborhood neighborhood = new NearestNUserNeighborhood(usuarioRepository.quantidade() / 5, similarity, model);
-                    return new GenericUserBasedRecommender(model, neighborhood, similarity);
-                }
-            };
-
-            Recommender recommender = recommenderBuilder.buildRecommender(model);
-            List<RecommendedItem> recomendations = recommender.recommend(code, 10);
-            for (RecommendedItem recommendedItem : recomendations) {
-                filmeRepository.findById(recommendedItem.getItemID()).ifPresent(f -> {
-                    f.add(linkTo(methodOn(FilmeController.class).read(f.getCode())).withSelfRel());
-                    filmes.add(f);
-                });
-            }
+            BufferedImage img = ImageIO.read(in);
+            Image scaledImage = img.getScaledInstance(img.getWidth() / 2, img.getHeight() / 2, Image.SCALE_SMOOTH);
+            BufferedImage imageBuff = new BufferedImage(img.getWidth() / 2, img.getHeight() / 2, BufferedImage.TYPE_INT_RGB);
+            imageBuff.getGraphics().drawImage(scaledImage, 0, 0, new Color(0, 0, 0), null);
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            ImageIO.write(imageBuff, "jpg", buffer);
+            return buffer.toByteArray();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("IOException in scale");
         }
-
-        return new ResponseEntity<>(filmes, HttpStatus.OK);
     }
 }
 

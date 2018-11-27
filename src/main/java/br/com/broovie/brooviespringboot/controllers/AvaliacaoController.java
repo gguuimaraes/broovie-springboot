@@ -26,7 +26,7 @@ public class AvaliacaoController implements GenericOperations<Avaliacao> {
     AvaliacaoRepository avaliacaoRepository;
 
     @Override
-    @PostMapping(path = "/avaliacao", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+    @PostMapping(path = "avaliacao", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public HttpEntity<Avaliacao> create(@RequestBody Avaliacao o) {
         avaliacaoRepository.save(o);
@@ -35,7 +35,7 @@ public class AvaliacaoController implements GenericOperations<Avaliacao> {
     }
 
     @Override
-    @PutMapping(path = "/avaliacao", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+    @PutMapping(path = "avaliacao", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public HttpEntity<Avaliacao> update(@RequestBody Avaliacao o) {
         Optional<Avaliacao> result = avaliacaoRepository.findById(o.getCode());
@@ -45,13 +45,13 @@ public class AvaliacaoController implements GenericOperations<Avaliacao> {
             avaliacao.setUsuario(o.getUsuario());
             avaliacaoRepository.save(avaliacao);
         });
-        result.orElseThrow(() -> new ResourceNotFoundException(Avaliacao.class, o.getCode()));
+        result.orElseThrow(() -> new ResourceNotFoundException(Avaliacao.class, "code",o.getCode()));
         o.add(linkTo(methodOn(AvaliacaoController.class).read(o.getCode())).withSelfRel());
         return new ResponseEntity<>(o, HttpStatus.CREATED);
     }
 
     @Override
-    @GetMapping(path = "/avaliacao/{code}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "avaliacao/{code}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public HttpEntity<Avaliacao> read(@PathVariable(value = "code") long code) {
         Optional<Avaliacao> result = avaliacaoRepository.findById(code);
         if (result.isPresent()) {
@@ -60,18 +60,18 @@ public class AvaliacaoController implements GenericOperations<Avaliacao> {
             entity.add(linkTo(methodOn(AvaliacaoController.class).read()).withRel("all"));
             return new ResponseEntity<>(entity, HttpStatus.OK);
         }
-        throw new ResourceNotFoundException(Avaliacao.class, code);
+        throw new ResourceNotFoundException(Avaliacao.class,"code", code);
     }
 
     @Override
-    @DeleteMapping(path = "/avaliacao/{code}")
+    @DeleteMapping(path = "avaliacao/{code}")
     public HttpEntity<Avaliacao> delete(@PathVariable(value = "code") long code) {
         Optional<Avaliacao> result = avaliacaoRepository.findById(code);
         result.ifPresent(avaliacao -> {
             avaliacao.setExcluido(true);
             avaliacaoRepository.save(avaliacao);
         });
-        result.orElseThrow(() -> new ResourceNotFoundException(Avaliacao.class, code));
+        result.orElseThrow(() -> new ResourceNotFoundException(Avaliacao.class, "code",code));
         result.get().add(linkTo(methodOn(AvaliacaoController.class).read(code)).withSelfRel());
         return new ResponseEntity<>(result.get(), HttpStatus.CREATED);
     }
@@ -82,7 +82,7 @@ public class AvaliacaoController implements GenericOperations<Avaliacao> {
     FilmeRepository filmeRepository;
 
     @Override
-    @GetMapping(path = "/avaliacoes", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(path = "avaliacoes", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public HttpEntity<List<Avaliacao>> read() {
 //        List<Avaliacao> avaliacoes = new ArrayList<>();
 //        Random random = new Random();

@@ -13,10 +13,11 @@ import java.util.Optional;
 public interface AmizadeRepository extends CrudRepository<Amizade, Long> {
     @Query(value = "SELECT a.solicitante FROM Amizade a WHERE a.situacao = 1 AND a.solicitado.code = ?1")
     List<Usuario> amigos(Long code);
+
     @Query(value = "SELECT a.solicitado FROM Amizade a WHERE a.situacao = 1 AND a.solicitante.code = ?1")
     List<Usuario> amigos2(Long code);
 
-    @Query(value = "SELECT a FROM Amizade a WHERE a.solicitado.code = ?1 AND a.solicitante = ?2")
+    @Query(value = "SELECT a FROM Amizade a WHERE a.solicitado.code = ?1 AND a.solicitante.code = ?2")
     Optional<Amizade> amizade(Long solicitado, Long solicitante);
 
     @Query(value = "SELECT a.solicitante FROM Amizade a WHERE a.solicitado.code = ?1 AND a.situacao = 0")

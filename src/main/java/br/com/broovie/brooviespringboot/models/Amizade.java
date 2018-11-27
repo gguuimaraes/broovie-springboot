@@ -17,8 +17,9 @@ import java.util.Date;
 @Table
 public class Amizade extends ResourceSupport {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    protected Long code;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "amizade_seq")
+    @SequenceGenerator(name = "amizade_seq", initialValue = 1, allocationSize = 1)
+    private Long code;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @Temporal(TemporalType.TIMESTAMP)

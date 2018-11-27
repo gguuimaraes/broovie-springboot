@@ -14,6 +14,9 @@ public interface AvaliacaoRepository extends CrudRepository<Avaliacao, Long> {
     Optional<Avaliacao> findById(Long code);
 
     @Override
-    @Query(name = "Avaliacao.findAll")
+    @Query(value = "SELECT a FROM Avaliacao a WHERE a.excluido = false")
     List<Avaliacao> findAll();
+
+    @Query(value = "SELECT a FROM Avaliacao a WHERE a.usuario.id = ?1")
+    List<Avaliacao> avaliacaoPorUsuario(Long code);
 }

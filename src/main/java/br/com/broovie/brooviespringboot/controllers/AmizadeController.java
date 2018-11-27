@@ -61,10 +61,10 @@ public class AmizadeController {
                                 .build();
                         amizadeRepository.save(amizade);
                     });
-                    optAmigo.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, amigo.getCode()));
+                    optAmigo.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, "code",amigo.getCode()));
                 }
             });
-            optUsuario.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, code));
+            optUsuario.orElseThrow(() -> new ResourceNotFoundException(Usuario.class,"code", code));
         }
         return amigos(code);
     }
@@ -89,7 +89,7 @@ public class AmizadeController {
                     }
                 }
             });
-            optUsuario.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, code));
+            optUsuario.orElseThrow(() -> new ResourceNotFoundException(Usuario.class, "code",code));
         }
         return amigos(code);
     }

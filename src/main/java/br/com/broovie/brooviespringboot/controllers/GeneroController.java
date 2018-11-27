@@ -41,7 +41,7 @@ public class GeneroController implements GenericOperations<Genero> {
             genero.setDescricao(o.getDescricao());
             generoRepository.save(genero);
         });
-        result.orElseThrow(() -> new ResourceNotFoundException(Genero.class, o.getCode()));
+        result.orElseThrow(() -> new ResourceNotFoundException(Genero.class, "code",o.getCode()));
         o.add(linkTo(methodOn(GeneroController.class).read(o.getCode())).withSelfRel());
         return new ResponseEntity<>(o, HttpStatus.CREATED);
     }
@@ -56,7 +56,7 @@ public class GeneroController implements GenericOperations<Genero> {
             entity.add(linkTo(methodOn(GeneroController.class).read()).withRel("all"));
             return new ResponseEntity<>(entity, HttpStatus.OK);
         }
-        throw new ResourceNotFoundException(Genero.class, code);
+        throw new ResourceNotFoundException(Genero.class, "code",code);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class GeneroController implements GenericOperations<Genero> {
             genero.setExcluido(true);
             generoRepository.save(genero);
         });
-        result.orElseThrow(() -> new ResourceNotFoundException(Genero.class, code));
+        result.orElseThrow(() -> new ResourceNotFoundException(Genero.class, "code",code));
         result.get().add(linkTo(methodOn(GeneroController.class).read(code)).withSelfRel());
         return new ResponseEntity<>(result.get(), HttpStatus.CREATED);
     }

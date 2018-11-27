@@ -10,13 +10,14 @@ import javax.persistence.*;
 @NoArgsConstructor
 @ToString
 
-@NamedQueries({
-        @NamedQuery(name = "Genero.findAll", query = "SELECT g FROM Genero g WHERE g.excluido = false"),
-        @NamedQuery(name = "Genero.pesquisar", query = "SELECT g FROM Genero g WHERE UPPER(g.descricao) LIKE CONCAT('%',UPPER(?1),'%') AND g.excluido = false")
-})
 @Entity
 @Table
 public class Genero extends DefaultModel {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "genero_seq")
+    @SequenceGenerator(name = "genero_seq", initialValue = 10771, allocationSize = 1)
+    private Long code;
+
     @Column
     private String descricao;
 

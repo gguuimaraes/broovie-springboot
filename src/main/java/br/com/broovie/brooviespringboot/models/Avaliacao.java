@@ -10,20 +10,25 @@ import javax.persistence.*;
 @NoArgsConstructor
 @ToString
 
-@NamedQueries({
-        @NamedQuery(name = "Avaliacao.findAll", query = "SELECT a FROM Avaliacao a WHERE a.excluido = false"),
-})
 @Entity
 @Table
 public class Avaliacao extends DefaultModel {
-    @OneToOne
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "avaliacao_seq")
+    @SequenceGenerator(name = "avaliacao_seq", initialValue = 371, allocationSize = 1)
+    private Long code;
+
+    @ManyToOne
     private Usuario usuario;
+
     @OneToOne
     private Filme filme;
-    @Enumerated
+
+    @Enumerated(EnumType.ORDINAL)
     private Nota nota;
 
     public enum Nota {
+        INUTIL,
         PESSIMO,
         RUIM,
         MEDIO,
