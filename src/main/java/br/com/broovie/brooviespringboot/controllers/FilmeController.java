@@ -59,7 +59,7 @@ public class FilmeController implements GenericOperations<Filme> {
             filme.setClassificacaoIndicativa(o.getClassificacaoIndicativa());
             filmeRepository.save(filme);
         });
-        result.orElseThrow(() -> new ResourceNotFoundException(Filme.class, "code",o.getCode()));
+        result.orElseThrow(() -> new ResourceNotFoundException(Filme.class, "code", o.getCode()));
         o.add(linkTo(methodOn(FilmeController.class).read(o.getCode())).withSelfRel());
         return new ResponseEntity<>(o, HttpStatus.CREATED);
     }
@@ -74,7 +74,7 @@ public class FilmeController implements GenericOperations<Filme> {
             entity.add(linkTo(methodOn(FilmeController.class).read()).withRel("all"));
             return new ResponseEntity<>(entity, HttpStatus.OK);
         }
-        throw new ResourceNotFoundException(Filme.class, "code",code);
+        throw new ResourceNotFoundException(Filme.class, "code", code);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class FilmeController implements GenericOperations<Filme> {
             filme.setExcluido(true);
             filmeRepository.save(filme);
         });
-        result.orElseThrow(() -> new ResourceNotFoundException(Filme.class, "code",code));
+        result.orElseThrow(() -> new ResourceNotFoundException(Filme.class, "code", code));
         result.get().add(linkTo(methodOn(FilmeController.class).read(code)).withSelfRel());
         return new ResponseEntity<>(result.get(), HttpStatus.CREATED);
     }
@@ -103,6 +103,15 @@ public class FilmeController implements GenericOperations<Filme> {
     @GetMapping(path = "/filmes/pesquisar", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public HttpEntity<List<Filme>> pesquisar(@RequestParam(value = "nome") String nome) {
         List<Filme> filmes = filmeRepository.pesquisar(nome);
+        filmes.forEach(f -> {
+            f.add(linkTo(methodOn(FilmeController.class).read(f.getCode())).withSelfRel());
+        });
+        return new ResponseEntity<>(filmes, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/filmes/emalta", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public HttpEntity<List<Filme>> emAlta() {
+        List<Filme> filmes = filmeRepository.emAlta();
         filmes.forEach(f -> {
             f.add(linkTo(methodOn(FilmeController.class).read(f.getCode())).withSelfRel());
         });

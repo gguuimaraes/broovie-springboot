@@ -4,8 +4,7 @@ package br.com.broovie.brooviespringboot.models;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 
 @Data
 @Builder
@@ -21,11 +20,16 @@ public class Filme extends DefaultModel {
     //@SequenceGenerator(name = "filme_seq", initialValue = 99, allocationSize = 1)
     private Long code;
 
-    @Column
+    @Column(nullable = false)
     private String nome;
 
-    @ManyToMany
-    private List<Genero> generos;
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "filme_genero",
+            foreignKey = @ForeignKey(name= "filme_fk"),
+            joinColumns = @JoinColumn(name = "filme_code", referencedColumnName = "code"),
+            inverseForeignKey =  @ForeignKey(name= "genero_fk"),
+            inverseJoinColumns = @JoinColumn(name = "genero_code", referencedColumnName = "code"))
+    private Set<Genero> generos;
 
     @Column(columnDefinition = "text")
     private String sinopse;
@@ -35,18 +39,4 @@ public class Filme extends DefaultModel {
     private String fotoCapa;
 
     private int classificacaoIndicativa;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Filme filme = (Filme) o;
-        return Objects.equals(code, filme.code);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), code);
-    }
 }

@@ -14,7 +14,7 @@ import java.util.Set;
 @ToString
 
 @Entity
-@Table
+@Table(uniqueConstraints = @UniqueConstraint(name = "nome_usuario_uq", columnNames = "nomeUsuario"))
 public class Usuario extends DefaultModel {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usuario_seq")
@@ -24,7 +24,7 @@ public class Usuario extends DefaultModel {
     @Column(length = 70, nullable = false)
     private String nome;
 
-    @Column(length = 30, unique = true, nullable = false)
+    @Column(length = 30, nullable = false)
     private String nomeUsuario;
 
     @Column(length = 40)
@@ -40,7 +40,12 @@ public class Usuario extends DefaultModel {
     @Column(nullable = false)
     private String senha;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "usuario_genero",
+            foreignKey = @ForeignKey(name = "usuario_fk"),
+            joinColumns = @JoinColumn(name = "usuario_code", referencedColumnName = "code"),
+            inverseForeignKey = @ForeignKey(name = "genero_fk"),
+            inverseJoinColumns = @JoinColumn(name = "genero_code", referencedColumnName = "code"))
     private Set<Genero> generos = new HashSet<>();
 
 }

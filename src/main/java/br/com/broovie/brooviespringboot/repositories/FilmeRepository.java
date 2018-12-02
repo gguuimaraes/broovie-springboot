@@ -20,4 +20,6 @@ public interface FilmeRepository extends JpaRepository<Filme, Long> {
     @Query(value = "SELECT f FROM Filme f WHERE UPPER(f.nome) LIKE CONCAT('%',UPPER(?1),'%') AND f.excluido = false")
     List<Filme> pesquisar(String nome);
 
+    @Query(value = "SELECT f FROM Filme f JOIN Avaliacao a ON a.filme.code = f.code WHERE a.nota = 5 GROUP BY f ORDER BY COUNT(a) DESC")
+    List<Filme> emAlta();
 }

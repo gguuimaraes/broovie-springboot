@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -63,7 +62,7 @@ public class CargaFilmeTask {
                                 .sinopse(item.getOverview())
                                 .adulto(item.isAdult())
                                 .fotoCapa(String.format("/images/%d.jpg", item.getId()))
-                                .generos(new ArrayList<>()).build();
+                                .generos(new HashSet<>()).build();
                         for (long gen_id : item.getGenre_ids()) {
                             filme.getGeneros().add(generoRepository.findById(gen_id).get());
                         }
@@ -83,7 +82,7 @@ public class CargaFilmeTask {
 
     public boolean saveImage(String url, String nome) {
         try (InputStream in = new URL("http://image.tmdb.org/t/p/original" + url).openStream()) {
-            Files.copy(in, Paths.get("D:\\projetos\\intellij\\broovie-springboot\\src\\main\\resources\\static\\images\\" + nome + ".jpg"));
+            Files.copy(in, Paths.get("C:\\broovie\\images\\" + nome + ".jpg"));
         } catch (Exception e) {
             return false;
         }

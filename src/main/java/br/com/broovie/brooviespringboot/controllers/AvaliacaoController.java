@@ -84,28 +84,6 @@ public class AvaliacaoController implements GenericOperations<Avaliacao> {
     @Override
     @GetMapping(path = "avaliacoes", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public HttpEntity<List<Avaliacao>> read() {
-//        List<Avaliacao> avaliacoes = new ArrayList<>();
-//        Random random = new Random();
-//        List<Usuario> usuarios = usuarioRepository.pesquisar("Nome", "NomeUsuario");
-//        List<Filme> filmes = filmeRepository.findAll();
-//        usuarios.forEach(u -> {
-//            int quantidadeAvaliacoes = random.nextInt(11) + 5;
-//            System.out.println("O usuario " + u.getNome() + " fará " + quantidadeAvaliacoes + " avaliações.");
-//            for (int numeroAvaliacao = 0; numeroAvaliacao < quantidadeAvaliacoes; numeroAvaliacao++) {
-//                int indexFilme = random.nextInt(filmes.size());
-//                int nota = random.nextInt(5) + 1;
-//                System.out.println((numeroAvaliacao + 1) + "ª Avaliacao - Filme " + filmes.get(indexFilme).getNome() + " com a nota " + nota);
-//                Avaliacao avaliacao = Avaliacao.builder()
-//                        .usuario(u)
-//                        .filme(filmes.get(indexFilme))
-//                        .nota(Avaliacao.Nota.values()[nota - 1])
-//                        .build();
-//                avaliacoes.add(avaliacao);
-//            }
-//        });
-//        avaliacaoRepository.saveAll(avaliacoes);
-
-
         List<Avaliacao> avaliacaos = avaliacaoRepository.findAll();
         avaliacaos.forEach(c -> {
             c.add(linkTo(methodOn(AvaliacaoController.class).read(c.getCode())).withSelfRel());
@@ -113,5 +91,13 @@ public class AvaliacaoController implements GenericOperations<Avaliacao> {
         return new ResponseEntity<>(avaliacaos, HttpStatus.OK);
     }
 
+    @GetMapping(path = "usuario/{codigoUsuario}/avaliacoes", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    public HttpEntity<List<Avaliacao>> avaliacaoPorUsuario(@PathVariable("codigoUsuario") Long codigoUsuario) {
+        List<Avaliacao> avaliacaos = avaliacaoRepository.avaliacaoPorUsuario(codigoUsuario);
+        avaliacaos.forEach(c -> {
+            c.add(linkTo(methodOn(AvaliacaoController.class).read(c.getCode())).withSelfRel());
+        });
+        return new ResponseEntity<>(avaliacaos, HttpStatus.OK);
+    }
 }
 

@@ -18,12 +18,15 @@ public class Avaliacao extends DefaultModel {
     @SequenceGenerator(name = "avaliacao_seq", initialValue = 371, allocationSize = 1)
     private Long code;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(foreignKey = @ForeignKey(name = "usuario_fk"))
     private Usuario usuario;
 
-    @OneToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(foreignKey = @ForeignKey(name = "filme_fk"))
     private Filme filme;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.ORDINAL)
     private Nota nota;
 

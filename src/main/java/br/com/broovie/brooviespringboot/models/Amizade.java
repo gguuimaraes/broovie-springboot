@@ -14,7 +14,7 @@ import java.util.Date;
 @ToString
 
 @Entity
-@Table
+@Table(uniqueConstraints = @UniqueConstraint(name = "solicitante_solicitado_uq", columnNames = {"solicitante_code", "solicitado_code"}))
 public class Amizade extends ResourceSupport {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "amizade_seq")
@@ -25,10 +25,12 @@ public class Amizade extends ResourceSupport {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dataSolicitacao;
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(foreignKey = @ForeignKey(name = "solicitante_fk"))
     private Usuario solicitante;
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(foreignKey = @ForeignKey(name = "solicitado_fk"))
     private Usuario solicitado;
 
     @Column

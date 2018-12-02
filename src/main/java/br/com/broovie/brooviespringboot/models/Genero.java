@@ -11,14 +11,14 @@ import javax.persistence.*;
 @ToString
 
 @Entity
-@Table
+@Table(uniqueConstraints = @UniqueConstraint(name = "descricao_uq", columnNames = "descricao"))
 public class Genero extends DefaultModel {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "genero_seq")
     @SequenceGenerator(name = "genero_seq", initialValue = 10771, allocationSize = 1)
     private Long code;
 
-    @Column
+    @Column(nullable = false)
     private String descricao;
 
 }
