@@ -65,7 +65,7 @@ public class RecommenderTask {
             codigos.forEach(codigo -> {
                 logger.info(String.format("Processando usuario código %d", codigo));
                 Usuario usuario = usuarioRepository.findById(codigo).get();
-                if (!avaliacaoRepository.avaliacaoPorUsuario(usuario.getCode()).isEmpty()) {
+                if (!avaliacaoRepository.avaliacaoPorUsuario(usuario.getCode(), null).isEmpty()) {
                     logger.info(String.format("Usuario %d possui avaliacoes", codigo));
                     try {
                         logger.info(String.format("Recomendando para o usuario %d", codigo));

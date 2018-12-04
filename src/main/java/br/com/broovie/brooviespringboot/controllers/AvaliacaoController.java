@@ -7,6 +7,7 @@ import br.com.broovie.brooviespringboot.repositories.AvaliacaoRepository;
 import br.com.broovie.brooviespringboot.repositories.FilmeRepository;
 import br.com.broovie.brooviespringboot.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -93,7 +94,7 @@ public class AvaliacaoController implements GenericOperations<Avaliacao> {
 
     @GetMapping(path = "usuario/{codigoUsuario}/avaliacoes", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public HttpEntity<List<Avaliacao>> avaliacaoPorUsuario(@PathVariable("codigoUsuario") Long codigoUsuario) {
-        List<Avaliacao> avaliacaos = avaliacaoRepository.avaliacaoPorUsuario(codigoUsuario);
+        List<Avaliacao> avaliacaos = avaliacaoRepository.avaliacaoPorUsuario(codigoUsuario, PageRequest.of(0, 10));
         avaliacaos.forEach(c -> {
             c.add(linkTo(methodOn(AvaliacaoController.class).read(c.getCode())).withSelfRel());
         });

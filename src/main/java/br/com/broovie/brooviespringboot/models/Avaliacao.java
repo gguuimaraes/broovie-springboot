@@ -22,7 +22,7 @@ public class Avaliacao extends DefaultModel {
     @JoinColumn(foreignKey = @ForeignKey(name = "usuario_fk"))
     private Usuario usuario;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "filme_fk"))
     private Filme filme;
 

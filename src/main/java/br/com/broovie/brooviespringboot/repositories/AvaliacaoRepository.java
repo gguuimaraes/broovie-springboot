@@ -1,6 +1,7 @@
 package br.com.broovie.brooviespringboot.repositories;
 
 import br.com.broovie.brooviespringboot.models.Avaliacao;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -18,5 +19,5 @@ public interface AvaliacaoRepository extends CrudRepository<Avaliacao, Long> {
     List<Avaliacao> findAll();
 
     @Query(value = "SELECT a FROM Avaliacao a WHERE a.usuario.id = ?1")
-    List<Avaliacao> avaliacaoPorUsuario(Long code);
+    List<Avaliacao> avaliacaoPorUsuario(Long code, Pageable pageable);
 }
